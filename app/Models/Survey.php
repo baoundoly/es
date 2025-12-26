@@ -36,4 +36,9 @@ class Survey extends Model
     {
         return $this->belongsTo(Result::class, 'result_id');
     }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(Admin::class, 'created_by');
+    }
 }

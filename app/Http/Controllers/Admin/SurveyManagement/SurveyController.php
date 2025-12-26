@@ -13,7 +13,7 @@ class SurveyController extends Controller
 {
     public function index(Request $request)
     {
-        $surveys = Survey::with(['voterInfo', 'result'])->paginate(30);
+        $surveys = Survey::with(['voterInfo', 'result', 'createdBy'])->paginate(30);
         
         return view('admin.survey_management.index', compact('surveys'));
     }

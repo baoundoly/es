@@ -51,6 +51,7 @@ class VoterController extends Controller
             $validated = $request->validate([
                 'ward_no_id' => 'required|exists:ward_nos,id',
                 'per_page' => 'nullable|integer|min:1|max:100',
+                'include_surveys' => 'nullable|in:all,latest,none',
             ]);
 
             $perPage = $validated['per_page'] ?? 50;
@@ -59,11 +60,21 @@ class VoterController extends Controller
             // Get ward name
             $ward = WardNo::find($wardId);
 
-            // Get voter info with pagination
-            $voters = VoterInfo::where('ward_no_id', $wardId)
+            $include = $validated['include_surveys'] ?? 'none';
+
+            // Prepare base query
+            $query = VoterInfo::where('ward_no_id', $wardId)
                 ->select('id', 'serial_no', 'name', 'voter_no', 'father_name', 'mother_name', 'profession', 'date_of_birth', 'address', 'gender', 'file_no')
-                ->orderBy('serial_no', 'asc')
-                ->paginate($perPage);
+                ->orderBy('serial_no', 'asc');
+
+            if ($include === 'all') {
+                $query->with('surveys');
+            } elseif ($include === 'latest') {
+                $query->with(['surveys' => function($q) { $q->orderBy('created_at', 'desc'); }]);
+            }
+
+            // Get voter info with pagination
+            $voters = $query->paginate($perPage);
 
             return response()->json([
                 'success' => true,
@@ -72,7 +83,21 @@ class VoterController extends Controller
                     'id' => $ward->id,
                     'name' => $ward->name,
                 ],
-                'data' => $voters->items(),
+                'data' => array_map(function($voter) use ($include) {
+                    if ($include === 'all') {
+                        return $voter->toArray();
+                    } elseif ($include === 'latest') {
+                        $arr = $voter->toArray();
+                        $arr['survey'] = null;
+                        if (isset($voter->surveys) && count($voter->surveys) > 0) {
+                            $arr['survey'] = $voter->surveys[0]->toArray();
+                        }
+                        unset($arr['surveys']);
+                        return $arr;
+                    }
+
+                    return $voter->toArray();
+                }, $voters->items()),
                 'pagination' => [
                     'total' => $voters->total(),
                     'count' => $voters->count(),
@@ -102,10 +127,19 @@ class VoterController extends Controller
      * Get single voter by ID
      * GET /api/voters/{id}
      */
-    public function getVoterById($id)
+    public function getVoterById(Request $request, $id)
     {
         try {
-            $voter = VoterInfo::find($id);
+            $include = $request->query('include_surveys', 'all');
+
+            $query = VoterInfo::where('id', $id);
+            if ($include === 'all') {
+                $query->with('surveys');
+            } elseif ($include === 'latest') {
+                $query->with(['surveys' => function($q) { $q->orderBy('created_at', 'desc'); }]);
+            }
+
+            $voter = $query->first();
 
             if (!$voter) {
                 return response()->json([
@@ -114,10 +148,19 @@ class VoterController extends Controller
                 ], 404);
             }
 
+            $data = $voter->toArray();
+            if ($include === 'latest') {
+                $data['survey'] = null;
+                if (isset($voter->surveys) && count($voter->surveys) > 0) {
+                    $data['survey'] = $voter->surveys[0]->toArray();
+                }
+                unset($data['surveys']);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Voter retrieved successfully',
-                'data' => $voter,
+                'data' => $data,
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -137,9 +180,19 @@ class VoterController extends Controller
         try {
             $validated = $request->validate([
                 'voter_no' => 'required|string|min:3',
+                'include_surveys' => 'nullable|in:all,latest,none',
             ]);
 
-            $voter = VoterInfo::where('voter_no', $validated['voter_no'])->first();
+            $include = $validated['include_surveys'] ?? 'all';
+
+            $query = VoterInfo::where('voter_no', $validated['voter_no']);
+            if ($include === 'all') {
+                $query->with('surveys');
+            } elseif ($include === 'latest') {
+                $query->with(['surveys' => function($q) { $q->orderBy('created_at', 'desc'); }]);
+            }
+
+            $voter = $query->first();
 
             if (!$voter) {
                 return response()->json([
@@ -148,10 +201,22 @@ class VoterController extends Controller
                 ], 404);
             }
 
+            if ($voter && $include === 'latest') {
+                $arr = $voter->toArray();
+                $arr['survey'] = null;
+                if (isset($voter->surveys) && count($voter->surveys) > 0) {
+                    $arr['survey'] = $voter->surveys[0]->toArray();
+                }
+                unset($arr['surveys']);
+                $voterData = $arr;
+            } else {
+                $voterData = $voter ? $voter->toArray() : null;
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Voter found',
-                'data' => $voter,
+                'data' => $voterData,
             ], 200);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
@@ -179,19 +244,29 @@ class VoterController extends Controller
                 'ward_no_id' => 'required|exists:ward_nos,id',
                 'address' => 'required|string|min:1|max:255',
                 'per_page' => 'nullable|integer|min:1|max:100',
+                'include_surveys' => 'nullable|in:all,latest,none',
             ]);
 
             $perPage = $validated['per_page'] ?? 500000;
 
             $ward = WardNo::find($validated['ward_no_id']);
 
-            $voters = VoterInfo::where('ward_no_id', $validated['ward_no_id'])
+            $include = $validated['include_surveys'] ?? 'all';
+
+            $query = VoterInfo::where('ward_no_id', $validated['ward_no_id'])
                 ->whereNotNull('address')
                 ->where('address', '!=', '')
                 ->where('address', 'like', '%' . $validated['address'] . '%')
                 ->select('id', 'serial_no', 'name', 'voter_no', 'father_name', 'mother_name', 'profession', 'date_of_birth', 'address', 'gender', 'file_no')
-                ->orderBy('serial_no', 'asc')
-                ->paginate($perPage);
+                ->orderBy('serial_no', 'asc');
+
+            if ($include === 'all') {
+                $query->with('surveys');
+            } elseif ($include === 'latest') {
+                $query->with(['surveys' => function($q) { $q->orderBy('created_at', 'desc'); }]);
+            }
+
+            $voters = $query->paginate($perPage);
 
             return response()->json([
                 'success' => true,
@@ -200,7 +275,21 @@ class VoterController extends Controller
                     'ward' => [ 'id' => $ward->id, 'name' => $ward->name ],
                     'address' => $validated['address'],
                 ],
-                'data' => $voters->items(),
+                'data' => array_map(function($voter) use ($include) {
+                    if ($include === 'all') {
+                        return $voter->toArray();
+                    } elseif ($include === 'latest') {
+                        $arr = $voter->toArray();
+                        $arr['survey'] = null;
+                        if (isset($voter->surveys) && count($voter->surveys) > 0) {
+                            $arr['survey'] = $voter->surveys[0]->toArray();
+                        }
+                        unset($arr['surveys']);
+                        return $arr;
+                    }
+
+                    return $voter->toArray();
+                }, $voters->items()),
                 'pagination' => [
                     'total' => $voters->total(),
                     'count' => $voters->count(),

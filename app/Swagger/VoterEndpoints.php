@@ -52,6 +52,13 @@ namespace App\Swagger;
  *     required=false,
  *     @OA\Schema(type="integer", default=1)
  *   ),
+ *   @OA\Parameter(
+ *     name="include_surveys",
+ *     in="query",
+ *     required=false,
+ *     @OA\Schema(type="string", enum={"all","latest","none"}),
+ *     description="Include associated surveys: all | latest | none (default: none)"
+ *   ),
  *   @OA\Response(
  *     response=200,
  *     description="Voters list",
@@ -86,6 +93,13 @@ namespace App\Swagger;
  *     required=true,
  *     @OA\Schema(type="integer")
  *   ),
+ *   @OA\Parameter(
+ *     name="include_surveys",
+ *     in="query",
+ *     required=false,
+ *     @OA\Schema(type="string", enum={"all","latest","none"}),
+ *     description="Include associated surveys: all | latest | none (default: none)"
+ *   ),
  *   @OA\Response(
  *     response=200,
  *     description="Voter",
@@ -109,6 +123,13 @@ namespace App\Swagger;
  *     required=true,
  *     @OA\Schema(type="string"),
  *     description="Voter number"
+ *   ),
+ *   @OA\Parameter(
+ *     name="include_surveys",
+ *     in="query",
+ *     required=false,
+ *     @OA\Schema(type="string", enum={"all","latest","none"}),
+ *     description="Include associated surveys: all | latest | none (default: none)"
  *   ),
  *   @OA\Response(
  *     response=200,
@@ -194,6 +215,13 @@ namespace App\Swagger;
  *     in="query",
  *     required=false,
  *     @OA\Schema(type="integer", default=50, maximum=100)
+ *   ),
+ *   @OA\Parameter(
+ *     name="include_surveys",
+ *     in="query",
+ *     required=false,
+ *     @OA\Schema(type="string", enum={"all","latest","none"}),
+ *     description="Include associated surveys: all | latest | none (default: none)"
  *   ),
  *   @OA\Response(
  *     response=200,

@@ -597,6 +597,20 @@
                             "type": "integer",
                             "default": 1
                         }
+                    },
+                    {
+                        "name": "include_surveys",
+                        "in": "query",
+                        "description": "Include associated surveys: all | latest | none (default: none)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "all",
+                                "latest",
+                                "none"
+                            ]
+                        }
                     }
                 ],
                 "responses": {
@@ -663,6 +677,20 @@
                         "schema": {
                             "type": "integer"
                         }
+                    },
+                    {
+                        "name": "include_surveys",
+                        "in": "query",
+                        "description": "Include associated surveys: all | latest | none (default: none)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "all",
+                                "latest",
+                                "none"
+                            ]
+                        }
                     }
                 ],
                 "responses": {
@@ -712,6 +740,20 @@
                         "required": true,
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include_surveys",
+                        "in": "query",
+                        "description": "Include associated surveys: all | latest | none (default: none)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "all",
+                                "latest",
+                                "none"
+                            ]
                         }
                     }
                 ],
@@ -875,6 +917,20 @@
                             "type": "integer",
                             "default": 50,
                             "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "include_surveys",
+                        "in": "query",
+                        "description": "Include associated surveys: all | latest | none (default: none)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "all",
+                                "latest",
+                                "none"
+                            ]
                         }
                     }
                 ],

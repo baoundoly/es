@@ -40,6 +40,9 @@ class SurveyController extends Controller
             }
             $survey = Survey::create($validated);
 
+            // load relations for response
+            $survey->load(['voterInfo', 'result']);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Survey created successfully.',
@@ -132,6 +135,9 @@ class SurveyController extends Controller
                 $validated['updated_by'] = auth()->id();
             }
             $survey->update($validated);
+
+            // reload relations
+            $survey->load(['voterInfo', 'result']);
 
             return response()->json([
                 'success' => true,
