@@ -1,0 +1,11 @@
+<?php
+Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
+
+Route::name('site-setting-management.')->prefix('site-setting-management')->namespace('SiteSettingManagement')->group(base_path('routes/admin/site_setting_management.php'));
+Route::name('role-management.')->prefix('role-management')->namespace('RoleManagement')->group(base_path('routes/admin/role_management.php'));
+Route::name('profile-management.')->prefix('profile-management')->namespace('ProfileManagement')->group(base_path('routes/admin/profile_management.php'));
+Route::name('user-management.')->prefix('user-management')->namespace('UserManagement')->group(base_path('routes/admin/user_management.php'));
+Route::name('member-management.')->prefix('member-management')->namespace('MemberManagement')->group(base_path('routes/admin/member_management.php'));
+Route::name('voter-management.')->prefix('voter-management')->namespace('VoterManagement')->group(base_path('routes/admin/voter_management.php'));
+Route::name('survey-management.')->prefix('survey-management')->namespace('SurveyManagement')->group(base_path('routes/admin/survey_management.php'));
+Route::name('result-management.')->prefix('result-management')->namespace('ResultManagement')->group(base_path('routes/admin/result_management.php'));
