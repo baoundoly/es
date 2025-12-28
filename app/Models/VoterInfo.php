@@ -26,6 +26,7 @@ class VoterInfo extends Model
         'created_by',
         'source_file',
         'status',
+        'cant_access',
     ];
 
     public function ward()

@@ -246,6 +246,69 @@ namespace App\Swagger;
  *   @OA\Response(response=401, description="Unauthenticated"),
  *   @OA\Response(response=422, description="Validation error")
  * )
+
+ * @OA\Post(
+ *   path="/api/voters/update-cant-access",
+ *   tags={"Voters"},
+ *   summary="Update cant_access flag for voters matching ward and exact address",
+ *   description="Updates the `cant_access` field for all voters that match the provided `ward_no_id` and exact `address`. Authentication required.",
+ *   @OA\RequestBody(
+ *     required=true,
+ *     @OA\MediaType(
+ *       mediaType="application/json",
+ *       @OA\Schema(
+ *         type="object",
+ *         @OA\Property(property="ward_no_id", type="integer", example=3),
+ *         @OA\Property(property="address", type="string", example="House 3, Road 12, Dhanmondi"),
+ *         @OA\Property(property="cant_access", type="integer", nullable=true, description="null=unknown,0=not access,1=can access", example=0)
+ *       )
+ *     )
+ *   ),
+ *   @OA\Response(
+ *     response=200,
+ *     description="Update result",
+ *     @OA\JsonContent(
+ *       @OA\Property(property="success", type="boolean", example=true),
+ *       @OA\Property(property="message", type="string", example="cant_access updated"),
+ *       @OA\Property(property="updated", type="integer", example=5)
+ *     )
+ *   ),
+ *   @OA\Response(response=401, description="Unauthenticated"),
+ *   @OA\Response(response=422, description="Validation error"),
+ *   @OA\Response(response=500, description="Server error")
+ * )
+ *
+ * @OA\Post(
+ *   path="/api/voters/update-address",
+ *   tags={"Voters"},
+ *   summary="Update ward and address for voters matching ward and exact address",
+ *   description="Finds voters by `ward_no_id` and exact `address` and updates their `ward_no_id` and `address` to new values.",
+ *   @OA\RequestBody(
+ *     required=true,
+ *     @OA\MediaType(
+ *       mediaType="application/json",
+ *       @OA\Schema(
+ *         type="object",
+ *         @OA\Property(property="voter_id", type="integer", example=10),
+ *         @OA\Property(property="new_ward_no_id", type="integer", example=4),
+ *         @OA\Property(property="new_address", type="string", example="House 3, Road 14, Dhanmondi"),
+ *         @OA\Property(property="new_voter_no", type="string", nullable=true, example="V987654")
+ *       )
+ *     )
+ *   ),
+ *   @OA\Response(
+ *     response=200,
+ *     description="Update result",
+ *     @OA\JsonContent(
+ *       @OA\Property(property="success", type="boolean", example=true),
+ *       @OA\Property(property="message", type="string", example="address and ward updated"),
+ *       @OA\Property(property="updated", type="integer", example=5)
+ *     )
+ *   ),
+ *   @OA\Response(response=401, description="Unauthenticated"),
+ *   @OA\Response(response=422, description="Validation error"),
+ *   @OA\Response(response=500, description="Server error")
+ * )
  */
 final class VoterEndpoints
 {

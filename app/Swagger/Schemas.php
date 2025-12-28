@@ -46,7 +46,8 @@ namespace App\Swagger;
  *   @OA\Property(property="address", type="string", nullable=true),
  *   @OA\Property(property="gender", type="string", nullable=true, example="Male"),
  *   @OA\Property(property="file_no", type="string", nullable=true),
- *   @OA\Property(property="ward_no_id", type="integer", nullable=true)
+ *   @OA\Property(property="ward_no_id", type="integer", nullable=true),
+ *   @OA\Property(property="cant_access", type="integer", nullable=true, description="null=unknown,0=not access,1=can access", example=0)
  * )
  *
  * @OA\Schema(
@@ -62,7 +63,7 @@ namespace App\Swagger;
  *   @OA\Property(property="new_address", type="string", nullable=true),
  *   @OA\Property(property="latitude", type="number", format="double", nullable=true),
  *   @OA\Property(property="longitude", type="number", format="double", nullable=true),
- *   @OA\Property(property="survey_time", type="string", format="time", nullable=true),
+ *   @OA\Property(property="survey_time", type="integer", nullable=true),
  *   @OA\Property(property="is_given_voterslip", type="integer", description="1=Yes,0=NA,2=No", example=0),
  *   @OA\Property(property="extra_info", type="string", nullable=true),
  *   @OA\Property(property="created_by", type="integer", nullable=true),

@@ -371,4 +371,112 @@ class VoterController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Update cant_access field for voters matching ward and address
+     * POST /api/voters/update-cant-access
+     * Body: { ward_no_id, address, cant_access }
+     */
+    public function updateCantAccess(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'ward_no_id' => 'required|exists:ward_nos,id',
+                'address' => 'required|string|min:1|max:1000',
+                'cant_access' => 'nullable|in:0,1',
+            ]);
+
+            $wardId = $validated['ward_no_id'];
+            $address = $validated['address'];
+            $value = array_key_exists('cant_access', $validated) ? $validated['cant_access'] : null;
+
+            $updatedCount = VoterInfo::where('ward_no_id', $wardId)
+                ->whereNotNull('address')
+                ->where('address', '!=', '')
+                ->where('address', $address)
+                ->update(['cant_access' => $value]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'cant_access updated',
+                'updated' => $updatedCount,
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating cant_access',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Update ward_no_id and address for voters matching ward and exact address
+     * POST /api/voters/update-address
+     * Body: { ward_no_id, address, new_ward_no_id, new_address }
+     */
+    public function updateAddress(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'voter_id' => 'required|exists:voter_infos,id',
+                'new_ward_no_id' => 'required|exists:ward_nos,id',
+                'new_address' => 'required|string|min:1|max:1000',
+                'new_voter_no' => 'nullable|string|max:255',
+            ]);
+
+            $voterId = $validated['voter_id'];
+            $newWardId = $validated['new_ward_no_id'];
+            $newAddress = $validated['new_address'];
+            $newVoterNo = $validated['new_voter_no'] ?? null;
+
+            $voter = VoterInfo::find($voterId);
+            if (!$voter) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Voter not found',
+                ], 404);
+            }
+
+            if ($newVoterNo !== null) {
+                $exists = VoterInfo::where('voter_no', $newVoterNo)->where('id', '!=', $voterId)->exists();
+                if ($exists) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'new_voter_no already exists for another voter',
+                    ], 422);
+                }
+            }
+
+            $updateData = ['ward_no_id' => $newWardId, 'address' => $newAddress];
+            if ($newVoterNo !== null) {
+                $updateData['voter_no'] = $newVoterNo;
+            }
+
+            $voter->update($updateData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'voter updated',
+                'updated' => 1,
+            ], 200);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating address',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

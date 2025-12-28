@@ -46,6 +46,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Address suggestions (word-wise)
     Route::get('/addresses', [VoterController::class, 'getAddressSuggestions']);
 
+    // Update cant_access field for voters by ward and address
+    Route::post('/voters/update-cant-access', [VoterController::class, 'updateCantAccess']);
+
+    // Update voter ward and address by matching ward and exact address
+    Route::post('/voters/update-address', [VoterController::class, 'updateAddress']);
+
     // Survey API routes
     Route::post('/surveys', [SurveyController::class, 'store']);
     Route::get('/surveys', [SurveyController::class, 'index']);

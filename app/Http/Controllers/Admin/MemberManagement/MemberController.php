@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Designation;
 use App\Models\Member;
 use Auth;
+use App\Models\Admin;
+use App\Models\UserRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -138,6 +140,50 @@ class MemberController extends Controller
                 $store->image = $file_path;
             }
             $store->save();
+
+            // Also create or link an Admin user and assign role 4; sync mobile and designation
+            try {
+                $admin = Admin::where('email', $store->email)->first();
+                if (!$admin) {
+                    $admin = new Admin();
+                    $admin->name = $store->name;
+                    $admin->email = $store->email;
+                    $admin->password = $store->password; // already bcrypt'd
+                    $admin->status = $store->status;
+                    $admin->mobile_no = $store->mobile_no ?? null;
+                    $admin->designation_id = $store->designation_id ?? null;
+                    $admin->created_by = auth()->user()->id ?? null;
+                    $admin->save();
+                } else {
+                    // update mobile and designation if changed
+                    $updated = false;
+                    if (($admin->mobile_no ?? '') !== ($store->mobile_no ?? '')) {
+                        $admin->mobile_no = $store->mobile_no ?? $admin->mobile_no;
+                        $updated = true;
+                    }
+                    if (($admin->designation_id ?? '') !== ($store->designation_id ?? '')) {
+                        $admin->designation_id = $store->designation_id ?? $admin->designation_id;
+                        $updated = true;
+                    }
+                    if ($updated) {
+                        $admin->save();
+                    }
+                }
+
+                // ensure UserRole exists for role_id = 4
+                $roleId = 4;
+                $userRole = UserRole::where('user_id', $admin->id)->where('role_id', $roleId)->first();
+                if (!$userRole) {
+                    $userRole = new UserRole();
+                    $userRole->user_id = $admin->id;
+                    $userRole->role_id = $roleId;
+                    $userRole->created_by = auth()->user()->id ?? null;
+                    $userRole->save();
+                }
+            } catch (\Exception $e) {
+                // don't block member creation if admin/userrole creation fails
+                \Log::error('Member->Admin sync error: '.$e->getMessage());
+            }
 
             DB::commit();
 
