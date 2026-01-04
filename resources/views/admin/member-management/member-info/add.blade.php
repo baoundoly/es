@@ -51,6 +51,17 @@
 											</div>
 										</div>
 										<div class="row">
+											<label for="working_area_id" class="col-md-3 col-form-label">Working Area</label>
+											<div class="col-md-9">
+												<select name="working_area_id" id="working_area_id" class="form-control form-control-sm working_area_id select2">
+													<option value="">Select Working Area</option>
+													@foreach($working_areas as $id => $name)
+													<option value="{{$id}}" {{(@$editData->working_area_id == $id)?('selected'):''}}>{{$name}}</option>
+													@endforeach
+												</select>
+											</div>
+										</div>
+										<div class="row">
 											<label for="working_place" class="col-md-3 col-form-label">Working place</label>
 											<div class="col-md-9">
 												<input type="text" class="form-control form-control-sm working_place" id="working_place" name="working_place" value="{{@$editData->working_place}}" placeholder="Working place">

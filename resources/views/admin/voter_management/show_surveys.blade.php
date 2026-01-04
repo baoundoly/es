@@ -30,7 +30,8 @@
             <th>New Address</th>
             <th>Contact</th>
             <th>Survey Time</th>
-            <th>Created At</th>
+            <th>Given Voter Slip</th>
+            <th>Taken In</th>
           </tr>
         </thead>
         <tbody>
@@ -67,6 +68,17 @@
                     echo sprintf('%dh %02dm %02ds', $h, $m, $sec);
                 }
               @endphp
+            </td>
+            <td>
+              @if($survey->is_given_voterslip)
+                @if ($survey->is_given_voterslip === 1)
+                  <span class="badge bg-success">Yes</span>
+                @else 
+                  <span class="badge bg-danger">No</span>
+                @endif
+              @else
+                <span class="badge bg-danger">N/A</span>
+              @endif
             </td>
             <td>
               <div>{{ optional($survey->created_at)->format('Y-m-d H:i') }}</div>

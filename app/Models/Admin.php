@@ -43,6 +43,10 @@ class Admin extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function member() {
+        return $this->belongsTo(Member::class, 'member_id', 'id' );
+    }
+
     public function designation() {
         return $this->belongsTo(Designation::class, 'designation_id', 'id' );
     }

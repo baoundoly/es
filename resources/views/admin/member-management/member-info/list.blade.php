@@ -66,6 +66,7 @@
 									<th>Email</th>
 									<th>Mobile No</th>
 									<th>Designation</th>
+									<th>Working Area</th>
 									<th>Working Place</th>
 									<th>Status</th>
 									<th width="10%" class="text-center">Action</th>
@@ -79,6 +80,7 @@
 									<td>{{ @$list->email ?? 'N/A' }}</td>
 									<td>{{ @$list->mobile_no ?? 'N/A' }}</td>
 									<td>{{ @$list->designation->name ?? 'N/A' }}</td>
+									<td>{{ @$list->working_area->name ?? 'N/A' }}</td>
 									<td>{{ @$list->working_place ?? 'N/A' }}</td>
 									<td>{!! activeStatus($list->status) !!}</td>
 									<td class="text-center">

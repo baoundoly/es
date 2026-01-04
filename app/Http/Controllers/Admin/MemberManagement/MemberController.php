@@ -8,6 +8,7 @@ use App\Models\Member;
 use Auth;
 use App\Models\Admin;
 use App\Models\UserRole;
+use App\Models\WardNo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -61,6 +62,7 @@ class MemberController extends Controller
     {
         $data['title'] = 'Add Member';
         $data['designations'] = Designation::orderBy('sort','asc')->get();
+        $data['working_areas'] = WardNo::where('status','1')->orderBy('order','asc')->pluck('name','id');
         return view('admin.member-management.member-info.add',$data);
     }
 
@@ -118,6 +120,7 @@ class MemberController extends Controller
             $store->email          = $request->email;
             $store->mobile_no      = $request->mobile_no;
             $store->designation_id = $request->designation_id;
+            $store->working_area_id = $request->working_area_id ?? null;
             $store->working_place  = $request->working_place;
             $store->status         = $request->status;
             $store->password       = bcrypt($request->password);
@@ -146,6 +149,7 @@ class MemberController extends Controller
                 $admin = Admin::where('email', $store->email)->first();
                 if (!$admin) {
                     $admin = new Admin();
+                    $admin->member_id = $store->id;
                     $admin->name = $store->name;
                     $admin->email = $store->email;
                     $admin->password = $store->password; // already bcrypt'd
@@ -198,6 +202,7 @@ class MemberController extends Controller
     {
         $data['title'] = 'Update Member';
         $data['designations'] = Designation::orderBy('sort','asc')->get();
+        $data['working_areas'] = WardNo::where('status','1')->orderBy('order','asc')->pluck('name','id');
         $data['editData'] = Member::where('id',$id)->firstOrFail();
         return view('admin.member-management.member-info.add',$data);
     }
@@ -235,6 +240,7 @@ class MemberController extends Controller
             $store->email          = $request->email;
             $store->mobile_no      = $request->mobile_no;
             $store->designation_id = $request->designation_id;
+            $store->working_area_id = $request->working_area_id ?? null;
             $store->working_place  = $request->working_place;
             $store->status         = $request->status;
             if($request->change_password){
@@ -259,6 +265,26 @@ class MemberController extends Controller
                 $store->image = $file_path;
             }
             $store->save();
+            // Also update linked Admin user; sync mobile and designation
+            try {
+                $admin = Admin::where('email', $store->email)->first();
+                if ($admin) {
+                    $admin->member_id = $store->id;
+                    $admin->name = $store->name;
+                    $admin->email = $store->email;
+                    if($request->change_password){
+                        $admin->password = $store->password; // already bcrypt'd
+                    }
+                    $admin->status = $store->status;
+                    $admin->mobile_no = $store->mobile_no ?? null;
+                    $admin->designation_id = $store->designation_id ?? null;
+                    $admin->updated_by = auth()->user()->id ?? null;
+                    $admin->save();
+                }
+            } catch (\Exception $e) {
+                // don't block member update if admin update fails
+                \Log::error('Member->Admin sync error: '.$e->getMessage());
+            }
 
             DB::commit();
 

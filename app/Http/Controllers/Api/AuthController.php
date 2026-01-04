@@ -22,6 +22,11 @@ class AuthController extends Controller
         }
 
         $user = Auth::guard('admin')->user();
+        $user->load('member.working_area'); // Load the related member data
+
+        // Extract only working area details and hide the member relation from response
+        $workingArea = optional($user->member)->working_area;
+        $user->unsetRelation('member');
 
         $token = $user->createToken('api-token')->plainTextToken;
 
@@ -29,6 +34,7 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user,
+            'working_area' => $workingArea,
         ]);
     }
 

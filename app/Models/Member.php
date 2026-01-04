@@ -44,7 +44,15 @@ class Member extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function admin() {
+        return $this->hasOne(Admin::class, 'member_id', 'id' );
+    }
+
     public function designation() {
         return $this->belongsTo(Designation::class, 'designation_id', 'id' );
+    }
+
+    public function working_area() {
+        return $this->belongsTo(WardNo::class, 'working_area_id', 'id' );
     }
 }

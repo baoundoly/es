@@ -8,6 +8,8 @@ use App\Models\Survey;
 use App\Models\VoterInfo;
 use App\Models\WardNo;
 use Illuminate\Http\Request;
+use App\Exports\SurveyExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SurveyController extends Controller
 {
@@ -115,5 +117,10 @@ class SurveyController extends Controller
         $survey->delete();
 
         return redirect()->route('admin.survey-management.survey-info.list')->with('success', 'Survey deleted successfully.');
+    }
+
+    public function export()
+    {
+        return Excel::download(new SurveyExport, 'surveys_' . date('Y-m-d_H-i-s') . '.xlsx');
     }
 }
