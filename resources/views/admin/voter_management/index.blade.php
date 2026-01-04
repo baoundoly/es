@@ -73,6 +73,9 @@
 								<span class="badge badge-info">{{ $voters->total() }} Records</span>
 							@endif
 						</h4>
+						<div>
+							<a href="{{ route('admin.voter-management.voter-info.with-surveys') }}" class="btn btn-sm btn-primary">Voters with Surveys</a>
+						</div>
 						<a href="{{ route('admin.voter-management.voter-info.add') }}" class="btn btn-sm btn-success float-right">
 							<i class="fas fa-plus"></i> Add New Voter
 						</a>

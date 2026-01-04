@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\WardNo;
 use App\Models\VoterInfo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class VoterController extends Controller
 {
@@ -333,21 +334,36 @@ class VoterController extends Controller
             $limit = $validated['limit'] ?? 200000;
             $prefix = isset($validated['prefix']) ? trim($validated['prefix']) : null;
 
-            $addressesQuery = VoterInfo::query()
+            // Group addresses and include aggregated cant_access value
+            $groupQuery = VoterInfo::query()
                 ->where('ward_no_id', $validated['ward_no_id'])
                 ->whereNotNull('address')
                 ->where('address', '!=', '')
-                ->select('address')
-                ->distinct();
-
-            if ($prefix !== null && $prefix !== '') {
-                $addressesQuery->where('address', 'like', $prefix . '%');
-            }
-
-            $addresses = $addressesQuery
-                ->orderBy('address')
+                ->when($prefix !== null && $prefix !== '', function($q) use ($prefix) {
+                    $q->where('address', 'like', $prefix . '%');
+                })
+                ->selectRaw('address, GROUP_CONCAT(DISTINCT cant_access) as cvals')
+                ->groupBy('address')
+                ->orderByRaw('LOWER(address) DESC')
                 ->limit($limit)
-                ->pluck('address');
+                ->get();
+
+            $addresses = $groupQuery->map(function($row) {
+                $cvals = $row->cvals; // e.g. "1,0" or "1" or null
+                if ($cvals === null) {
+                    $cant = null;
+                } elseif (strpos($cvals, ',') === false) {
+                    $cant = is_numeric($cvals) ? (int) $cvals : null;
+                } else {
+                    // mixed values (0 and 1) -> unknown for the address
+                    $cant = null;
+                }
+
+                return [
+                    'address' => $row->address,
+                    'cant_access' => $cant,
+                ];
+            });
 
             return response()->json([
                 'success' => true,
@@ -444,26 +460,26 @@ class VoterController extends Controller
                 ], 404);
             }
 
-            if ($newVoterNo !== null) {
-                $exists = VoterInfo::where('voter_no', $newVoterNo)->where('id', '!=', $voterId)->exists();
-                if ($exists) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'new_voter_no already exists for another voter',
-                    ], 422);
-                }
-            }
+            // if ($newVoterNo !== null) {
+            //     $exists = VoterInfo::where('voter_no', $newVoterNo)->where('id', '!=', $voterId)->exists();
+            //     if ($exists) {
+            //         return response()->json([
+            //             'success' => false,
+            //             'message' => 'new_voter_no already exists for another voter',
+            //         ], 422);
+            //     }
+            // }
 
-            $updateData = ['ward_no_id' => $newWardId, 'address' => $newAddress];
-            if ($newVoterNo !== null) {
-                $updateData['voter_no'] = $newVoterNo;
-            }
+             $updateData = ['ward_no_id' => $newWardId, 'address' => $newAddress];
+            // if ($newVoterNo !== null) {
+            //     $updateData['voter_no'] = $newVoterNo;
+            // }
 
             $voter->update($updateData);
 
             return response()->json([
                 'success' => true,
-                'message' => 'voter updated',
+                'message' => $voter->wasChanged() ? 'Address updated' : 'No changes made',
                 'updated' => 1,
             ], 200);
             return response()->json([

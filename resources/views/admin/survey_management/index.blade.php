@@ -108,9 +108,33 @@
                                                                                                                 <h6 class="mb-3 text-muted">Survey Info</h6>
                                                                                                                 <ul class="list-unstyled">
                                                                                                                   <li><strong>Email:</strong> <span class="text-muted">{{ $survey->email ?? 'N/A' }}</span></li>
-                                                                                                                  <li><strong>Survey Time:</strong> <span class="text-muted">{{ $survey->survey_time ?? 'N/A' }}</span></li>
+                                                                                                                <li><strong>Survey Time:</strong> <span class="text-muted">
+                                                                                                                    @php
+                                                                                                                        if ($survey->survey_time === null) {
+                                                                                                                                echo 'N/A';
+                                                                                                                        } else {
+                                                                                                                                $s = (int) $survey->survey_time;
+                                                                                                                                $h = intdiv($s, 3600);
+                                                                                                                                $m = intdiv($s % 3600, 60);
+                                                                                                                                $sec = $s % 60;
+                                                                                                                                echo sprintf('%dh %02dm %02ds', $h, $m, $sec);
+                                                                                                                        }
+                                                                                                                    @endphp
+                                                                                                                </span></li>
                                                                                                                   <li><strong>Geolocation:</strong> <span class="text-muted">{{ $survey->latitude ?? 'N/A' }}, {{ $survey->longitude ?? 'N/A' }}</span></li>
-                                                                                                                  <li><strong>Given Voter Slip:</strong> <span class="text-muted">{{ $survey->is_given_voterslip ?? 'N/A' }}</span></li>
+                                                                                                                <li><strong>Given Voter Slip:</strong> <span class="text-muted">
+                                                                                                                    @php
+                                                                                                                        $gv = $survey->is_given_voterslip;
+                                                                                                                        if ($gv === null) {
+                                                                                                                                echo 'N/A';
+                                                                                                                        } else {
+                                                                                                                                $gv = (int) $gv;
+                                                                                                                                if ($gv === 1) echo 'Yes';
+                                                                                                                                elseif ($gv === 2) echo 'No';
+                                                                                                                                else echo 'NA';
+                                                                                                                        }
+                                                                                                                    @endphp
+                                                                                                                </span></li>
                                                                                                                   <li><strong>Created By:</strong> <span class="text-muted">{{ $survey->createdBy->name ?? 'System' }} @if($survey->created_at) <small class="text-muted">• {{ $survey->created_at->format('Y-m-d H:i') }}</small> @endif</span></li>
                                                                                                                 </ul>
                                                                                                                 @if($survey->result)

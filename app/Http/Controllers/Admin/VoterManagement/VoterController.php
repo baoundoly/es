@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Validators\ValidationException;
 
 use App\Models\VoterInfo;
+use App\Models\Survey;
 
 class VoterController extends Controller
 {
@@ -158,5 +159,39 @@ class VoterController extends Controller
     public function destroy()
     {
         // Logic to delete voter information
+    }
+
+    /**
+     * List voters who have surveys with count
+     */
+    public function withSurveys(Request $request)
+    {
+        $query = VoterInfo::has('surveys')->withCount('surveys')->with('ward');
+
+        if ($request->filled('ward_no')) {
+            $query->where('ward_no_id', $request->ward_no);
+        }
+
+        $voters = $query->orderBy('surveys_count', 'desc')->paginate(30)->appends($request->all());
+
+        $data['voters'] = $voters;
+        $data['ward_nos'] = WardNo::where('status', '1')->orderBy('order', 'asc')->pluck('name', 'id');
+
+        return view('admin.voter_management.with_surveys', $data);
+    }
+
+    /**
+     * Show surveys for a single voter
+     */
+    public function showSurveys($id)
+    {
+        $voter = VoterInfo::with('ward')->find($id);
+        if (!$voter) {
+            return redirect()->back()->with('error', 'Voter not found');
+        }
+
+        $surveys = Survey::with('createdBy')->where('voter_info_id', $id)->orderBy('created_at', 'desc')->get();
+
+        return view('admin.voter_management.show_surveys', compact('voter', 'surveys'));
     }
 }
