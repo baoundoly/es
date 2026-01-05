@@ -165,14 +165,46 @@
                                 </table>
                             </div>
                             <!-- Pagination -->
-							<div class="d-flex justify-content-between align-items-center mt-4">
-								<div>
-									Showing {{ $surveys->firstItem() }} to {{ $surveys->lastItem() }} of {{ $surveys->total() }} results
+							<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4">
+								<div class="mb-3 mb-md-0 text-center text-md-start">
+									<small class="text-muted">Showing {{ $surveys->firstItem() }} to {{ $surveys->lastItem() }} of {{ $surveys->total() }} results</small>
 								</div>
-								<nav>
+								<div class="pagination-wrapper">
 									{{ $surveys->render() }}
-								</nav>
+								</div>
 							</div>
+							<style>
+								.pagination-wrapper {
+									overflow-x: auto;
+									overflow-y: hidden;
+									width: 100%;
+									-webkit-overflow-scrolling: touch;
+								}
+								
+								@media (min-width: 768px) {
+									.pagination-wrapper {
+										width: auto;
+										overflow: visible;
+									}
+								}
+								
+								@media (max-width: 767px) {
+									.pagination {
+										font-size: 0.875rem;
+										flex-wrap: nowrap;
+										margin: 0;
+										justify-content: flex-start;
+									}
+									.pagination .page-link {
+										padding: 0.375rem 0.625rem;
+										white-space: nowrap;
+									}
+									.pagination-wrapper {
+										margin: 0 -15px;
+										padding: 0 15px;
+									}
+								}
+							</style>
 						@else
 							<div class="alert alert-info">
 								<i class="fas fa-info-circle"></i> No voter records found. Try adjusting your filters.
