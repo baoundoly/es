@@ -50,4 +50,31 @@
     <div class="mt-3">{{ $voters->links() }}</div>
   </div>
 </div>
+
+<style>
+  @media (max-width: 767px) {
+    .card-body {
+      overflow-x: hidden;
+    }
+    
+    .pagination {
+      font-size: 0.875rem;
+      flex-wrap: nowrap;
+      margin: 0;
+      display: flex;
+      justify-content: flex-start;
+    }
+    
+    .pagination .page-link {
+      padding: 0.375rem 0.625rem;
+      white-space: nowrap;
+    }
+    
+    .mt-3 {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+  }
+</style>
 @endsection

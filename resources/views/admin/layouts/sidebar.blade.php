@@ -170,7 +170,7 @@ $nav_menus = [];
         <img src="{{fileExist(['url'=>@$site_setting->logo,'type'=>'logo'])}}" alt="Brand Logo" class="brand-image  elevation-3">
         <span class="brand-text font-weight-light">{{(@$site_setting->name)?(@$site_setting->name):'Project Name'}}</span>
     </a>
-    <div class="sidebar">
+    <div class="sidebar mt-0">
         <div class="form-inline mt-2">
             <div class="input-group" data-widget="sidebar-search">
                 <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">

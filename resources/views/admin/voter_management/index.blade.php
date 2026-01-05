@@ -124,7 +124,7 @@
 							<!-- Pagination -->
 							<div class="d-flex justify-content-between align-items-center mt-4">
 								<div>
-									Showing {{ $voters->firstItem() }} to {{ $voters->lastItem() }} of {{ $voters->total() }} results
+									<small class="text-muted">Showing {{ $voters->firstItem() }} to {{ $voters->lastItem() }} of {{ $voters->total() }} results</small>
 								</div>
 								<nav>
 									{{ $voters->render() }}
@@ -150,4 +150,37 @@
 		}
 	}
 </script>
+
+<style>
+	@media (max-width: 767px) {
+		.d-flex.justify-content-between.align-items-center.mt-4 {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+		
+		.d-flex.justify-content-between.align-items-center.mt-4 > div:first-child {
+			margin-bottom: 1rem;
+			width: 100%;
+		}
+		
+		.d-flex.justify-content-between.align-items-center.mt-4 > nav {
+			width: 100%;
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+		
+		.pagination {
+			font-size: 0.875rem;
+			flex-wrap: nowrap;
+			margin: 0;
+			display: flex;
+			justify-content: flex-start;
+		}
+		
+		.pagination .page-link {
+			padding: 0.375rem 0.625rem;
+			white-space: nowrap;
+		}
+	}
+</style>
 @endsection
