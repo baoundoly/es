@@ -94,20 +94,20 @@ class DashboardController extends Controller
         $pendingVerification = Survey::whereNull('result_id')->count();
         $flaggedEntries = Survey::where('extra_info', 'like', '%flag%')->count();
 
-            // Totals from other models
-            $totalWards = WardNo::count();
-            $totalVoters = VoterInfo::count();
+        // Totals from other models
+        $totalWards = WardNo::count();
+        $totalVoters = VoterInfo::count();
 
-            // Active enumerators (distinct creators with surveys in last 7 days)
-            if (Schema::hasColumn('surveys', 'created_by')) {
-                $activeEnumerators = Survey::whereNotNull('created_by')
-                    ->where('created_at', '>=', now()->subDays(7)->startOfDay())
-                    ->distinct('created_by')
-                    ->count('created_by');
-            } else {
-                // Fallback: no created_by column — set to 0 and avoid query error
-                $activeEnumerators = 0;
-            }
+        // Active enumerators (distinct creators with surveys in last 7 days)
+        if (Schema::hasColumn('surveys', 'created_by')) {
+            $activeEnumerators = Survey::whereNotNull('created_by')
+                ->where('created_at', '>=', now()->subDays(7)->startOfDay())
+                ->distinct('created_by')
+                ->count('created_by');
+        } else {
+            // Fallback: no created_by column — set to 0 and avoid query error
+            $activeEnumerators = 0;
+        }
 
         $completedCount = Survey::whereNotNull('result_id')->count();
         $completionRate = $totalSurveys ? round(($completedCount / $totalSurveys) * 100) . '%' : '0%';
@@ -134,7 +134,8 @@ class DashboardController extends Controller
         }
 
         $recentSurveys = Survey::with('voterInfo')->orderBy('created_at', 'desc')->limit(6)->get();
-        $coverageCount = Survey::where('created_at', '>=', now()->subDays(7))->count();
+        // $coverageCount = Survey::where('created_at', '>=', now()->subDays(7))->count();
+        $coverageCount = ($totalSurveys / $totalVoters) * 100;
 
         Log::debug('dashboard data', [
             'completionLabels' => $completionLabels,

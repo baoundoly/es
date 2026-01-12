@@ -70,7 +70,7 @@
 				<div class="kpi-accent green"></div>
 				<div class="p-3">
 					<div class="small-muted">Coverage %</div>
-					<div class="stat-value">{{ is_numeric($k_coverage) ? ($k_coverage . '%') : $k_coverage }}</div>
+					<div class="stat-value">{{ number_format($k_coverage, 2) }}%</div>
 				</div>
 			</div>
 		</div>
